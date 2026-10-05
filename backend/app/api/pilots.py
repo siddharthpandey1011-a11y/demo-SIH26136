@@ -92,3 +92,18 @@ def get_pilot(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
     return pilot
+
+@router.patch("/{pilot_id}/budget", response_model=PilotResponse)
+def update_pilot_budget(
+    pilot_id: int,
+    budget_in: __import__('app.schemas.pilot', fromlist=['PilotBudgetUpdate']).PilotBudgetUpdate,
+    current_user: User = Depends(require_role('officer')),
+    db: Session = Depends(get_db)
+):
+    pilot = db.query(Pilot).filter(Pilot.id == pilot_id).first()
+    if not pilot:
+        raise HTTPException(status_code=404, detail="Pilot not found")
+    pilot.total_budget = budget_in.total_budget
+    db.commit()
+    db.refresh(pilot)
+    return pilot

@@ -44,7 +44,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     try {
       const token = api.getToken();
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/uploads`, {
+      const res = await fetch(`/api/uploads`, {
         method: 'POST',
         headers: token ? {
           'Authorization': `Bearer ${token}`

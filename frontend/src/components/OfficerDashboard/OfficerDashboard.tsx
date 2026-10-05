@@ -35,6 +35,8 @@ export const OfficerDashboard: React.FC = () => {
   const [pilotAppId, setPilotAppId] = useState<number | null>(null);
   const [showAddKpi, setShowAddKpi] = useState(false);
   const [showRecordDecision, setShowRecordDecision] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [budgetInput, setBudgetInput] = useState<number | ''>('');
 
   // Form states
   const [newChallenge, setNewChallenge] = useState({
@@ -52,6 +54,7 @@ export const OfficerDashboard: React.FC = () => {
     scope: '',
     timeline_start: new Date().toISOString().split('T')[0],
     timeline_end: new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0],
+    total_budget: 0,
   });
 
   const [newKpi, setNewKpi] = useState({
@@ -172,6 +175,7 @@ export const OfficerDashboard: React.FC = () => {
         scope: newPilot.scope,
         timeline_start: newPilot.timeline_start,
         timeline_end: newPilot.timeline_end,
+        total_budget: newPilot.total_budget,
       });
       showToast('success', 'Pilot created successfully!');
       setShowCreatePilot(false);
@@ -730,11 +734,23 @@ export const OfficerDashboard: React.FC = () => {
                   {/* Financial Tracking Panel */}
                   <div className="content-card">
                     <div className="content-card-header">
-                      <div>
-                        <h3 className="card-title">💰 Financial Tracking</h3>
-                        <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
-                          Total Budget: <strong>₹{selectedPilot.total_budget?.toLocaleString('en-IN') || 'Not Set'}</strong>
+                      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                        <div>
+                          <h3 className="card-title">💰 Financial Tracking</h3>
+                          <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+                            Total Budget: <strong>₹{selectedPilot.total_budget?.toLocaleString('en-IN') || 'Not Set'}</strong>
+                          </div>
                         </div>
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          style={{ padding: '4px 12px', fontSize: '12px' }}
+                          onClick={() => {
+                            setBudgetInput(selectedPilot.total_budget || '');
+                            setShowBudgetModal(true);
+                          }}
+                        >
+                          {selectedPilot.total_budget ? 'Edit Budget' : 'Add Budget'}
+                        </button>
                       </div>
                       <button className="btn btn-primary btn-sm" onClick={() => setShowAddMilestone(true)}>
                         <PlusCircle size={14} /> Add Milestone
@@ -899,8 +915,9 @@ export const OfficerDashboard: React.FC = () => {
                     className="form-input"
                     required
                     placeholder="e.g. Smart Water Monitoring for Municipal Networks"
-                    value={newChallenge.title}
-                    onChange={(e) => setNewChallenge({ ...newChallenge, title: e.target.value })}
+                    minLength={3}
+                      value={newChallenge.title}
+                      onChange={(e) => setNewChallenge({ ...newChallenge, title: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -909,8 +926,9 @@ export const OfficerDashboard: React.FC = () => {
                     className="form-textarea"
                     required
                     placeholder="Describe municipal problem context, sensor requirements, and goals..."
-                    value={newChallenge.description}
-                    onChange={(e) => setNewChallenge({ ...newChallenge, description: e.target.value })}
+                    minLength={10}
+                      value={newChallenge.description}
+                      onChange={(e) => setNewChallenge({ ...newChallenge, description: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -920,8 +938,9 @@ export const OfficerDashboard: React.FC = () => {
                     className="form-input"
                     required
                     placeholder="e.g. Reduce non-revenue water loss by >15%"
-                    value={newChallenge.outcomes}
-                    onChange={(e) => setNewChallenge({ ...newChallenge, outcomes: e.target.value })}
+                    minLength={5}
+                      value={newChallenge.outcomes}
+                      onChange={(e) => setNewChallenge({ ...newChallenge, outcomes: e.target.value })}
                   />
                 </div>
                 <div className="form-group">
@@ -931,8 +950,9 @@ export const OfficerDashboard: React.FC = () => {
                     className="form-input"
                     required
                     placeholder="e.g. Must integrate with SCADA, IP68 waterproofing"
-                    value={newChallenge.constraints}
-                    onChange={(e) => setNewChallenge({ ...newChallenge, constraints: e.target.value })}
+                    minLength={5}
+                      value={newChallenge.constraints}
+                      onChange={(e) => setNewChallenge({ ...newChallenge, constraints: e.target.value })}
                   />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -1023,6 +1043,18 @@ export const OfficerDashboard: React.FC = () => {
                       onChange={(e) => setNewPilot({ ...newPilot, timeline_end: e.target.value })}
                     />
                   </div>
+                </div>
+                <div className="form-group" style={{ marginTop: '12px' }}>
+                  <label className="form-label">Total Budget (,1)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="form-input"
+                    required
+                    placeholder="e.g. 1500000"
+                    value={newPilot.total_budget || ''}
+                    onChange={(e) => setNewPilot({ ...newPilot, total_budget: parseFloat(e.target.value) || 0 })}
+                  />
                 </div>
               </div>
               <div className="modal-footer">
@@ -1199,6 +1231,54 @@ export const OfficerDashboard: React.FC = () => {
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowReleaseModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-success">Confirm Release</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* UPDATE BUDGET MODAL */}
+      {showBudgetModal && (
+        <div className="modal-overlay">
+          <div className="modal-dialog" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Set Pilot Budget</h3>
+              <button className="modal-close-btn" onClick={() => setShowBudgetModal(false)}><X size={18} /></button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (!selectedPilot) return;
+              try {
+                await api.updatePilotBudget(selectedPilot.id, Number(budgetInput));
+                showToast('success', 'Pilot budget updated successfully!');
+                setShowBudgetModal(false);
+                loadPilotDetails(selectedPilot.id);
+              } catch (err: unknown) {
+                showToast('error', err instanceof Error ? err.message : 'Failed to update budget');
+              }
+            }}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Total Budget (₹)</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    required
+                    min="0"
+                    autoFocus
+                    placeholder="e.g. 1500000"
+                    value={budgetInput}
+                    onChange={(e) => setBudgetInput(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowBudgetModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Save Budget
+                </button>
               </div>
             </form>
           </div>

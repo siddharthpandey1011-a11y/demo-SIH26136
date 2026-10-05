@@ -83,19 +83,29 @@ export const ActiveProblemStatements: React.FC<ActiveProblemStatementsProps> = (
   // ── Fetch published challenges (public, no auth) ──────────────────────────
   useEffect(() => {
     const API_BASE = import.meta.env.VITE_API_URL || '';
-    fetch(`${API_BASE}/challenges/public`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        return res.json();
-      })
-      .then((data: Challenge[]) => {
-        setChallenges(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message || 'Failed to load challenges');
-        setLoading(false);
-      });
+    
+    const fetchChallenges = () => {
+      fetch(`${API_BASE}/challenges/public`)
+        .then((res) => {
+          if (!res.ok) throw new Error(`Server error: ${res.status}`);
+          return res.json();
+        })
+        .then((data: Challenge[]) => {
+          setChallenges(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message || 'Failed to load challenges');
+          setLoading(false);
+        });
+    };
+
+    // Initial fetch
+    fetchChallenges();
+
+    // Auto-synchronize every 10 seconds
+    const intervalId = setInterval(fetchChallenges, 10000);
+    return () => clearInterval(intervalId);
   }, []);
 
   // ── Derived filter options from real data ─────────────────────────────────

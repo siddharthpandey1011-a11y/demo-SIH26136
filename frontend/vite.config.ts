@@ -31,6 +31,8 @@ export default defineConfig({
       '/users': { target: 'http://localhost:8000', changeOrigin: true },
       '/milestones': { target: 'http://localhost:8000', changeOrigin: true },
       '/invoices': { target: 'http://localhost:8000', changeOrigin: true },
+      '/kpis': { target: 'http://localhost:8000', changeOrigin: true },
+      '/evidence': { target: 'http://localhost:8000', changeOrigin: true },
       '/health': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },

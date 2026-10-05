@@ -5,8 +5,12 @@ Authentication endpoints:
   GET  /api/auth/me        — JWT-protected own profile
   GET  /api/auth/me/startup — JWT-protected own startup profile
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.orm import Session
+import secrets
+import hashlib
+from datetime import datetime, timezone, timedelta
+from app.models.refresh_token import RefreshToken
 
 from app.auth import (
     create_access_token,

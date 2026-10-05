@@ -321,10 +321,18 @@ class ApiClient {
     scope: string;
     timeline_start: string;
     timeline_end: string;
+    total_budget?: number;
   }): Promise<Pilot> {
     return this.request<Pilot>('/pilots', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  }
+
+  updatePilotBudget(pilotId: number, total_budget: number): Promise<Pilot> {
+    return this.request<Pilot>(`/pilots/${pilotId}/budget`, {
+      method: 'PATCH',
+      body: JSON.stringify({ total_budget }),
     });
   }
 
@@ -384,7 +392,7 @@ class ApiClient {
   }
 
   releaseMilestone(milestoneId: number, release_notes?: string): Promise<Milestone> {
-    return this.request<Milestone>(`/milestones/${milestoneId}/release`, {
+    return this.request<Milestone>(`/pilots/milestones/${milestoneId}/release`, {
       method: 'PATCH',
       body: JSON.stringify({ release_notes }),
     });

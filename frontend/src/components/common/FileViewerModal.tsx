@@ -42,6 +42,8 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ fileUrl, onClo
         style={{
           width: '90%',
           maxWidth: '1200px',
+          height: '90vh',
+          maxHeight: '95vh',
           backgroundColor: '#fff',
           borderRadius: '8px',
           overflow: 'hidden',
@@ -59,21 +61,23 @@ export const FileViewerModal: React.FC<FileViewerModalProps> = ({ fileUrl, onClo
             <X size={24} />
           </button>
         </div>
-        <div style={{ padding: '16px', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'center' }}>
-          {isPdf ? (
+        {isPdf ? (
+          <div style={{ flex: 1, overflow: 'hidden', backgroundColor: '#f8fafc' }}>
             <iframe
               src={fullUrl}
-              style={{ width: '100%', height: 'calc(100vh - 120px)', border: 'none' }}
+              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
               title={title}
             />
-          ) : (
+          </div>
+        ) : (
+          <div style={{ padding: '16px', backgroundColor: '#f8fafc', flex: 1, overflow: 'auto', textAlign: 'center' }}>
             <img
               src={fullUrl}
-              style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 120px)', objectFit: 'contain' }}
+              style={{ display: 'inline-block', maxWidth: 'none', height: 'auto' }}
               alt="Document"
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
